@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx
+     	   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd
+           http://www.springframework.org/schema/mvc 
+		   http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+		   
+    <!-- <context:component-scan/>标签是告诉Spring 来扫描指定包下的类，
+    	并注册被@Component，@Controller，@Service，@Repository等注解标记的组件。 -->       
+    <context:component-scan base-package="org/mina/sourcegenerator"></context:component-scan> 
+     
+     <!-- aop:aspectj-autoproxy将会在spring上下文中创建一个AnnotationAwareAspectJAutoProxyCreator代理类，
+     	  他会自动代理一些使用@Aspect注解的bean中定义的切点相匹配。 -->
+     <aop:aspectj-autoproxy/>
+     
+    <!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    	<!--  JstlView将请求传递给jsp，她还会公布特定的jstl请求属性，使用jstl国际化支持-->
+    	<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <!-- 如果没有处理映射bean，DispatcherServlet将创建并使用BeanNameUrlHandlerMapping和DefaultAnnotationHandlerMapping
+    	DefaultAnnotationHandlerMapping将请求映射到使用@RequestMapping的方法。
+    	
+     	<mvc:annotation-driven/>表示在SpringMVC中注册了AnnotationMethodHandlerAdapter与DefaultAnnotationHandlerMapping
+     	AnnotationMethodHandlerAdapter(它是处理请求的适配器，说白了，就是确定调用哪个类的哪个方法，并且构造方法参数，返回值)
+     	 等bean，表示为@controller、@requestMapping做好准备工作，但是 此时被注解的bean并没有被加入到spring容器中，
+     	 此时需要用<context:component-scan/>扫描并注册bean
+     	 因此我们在SpringMVC中出现将<mvc:annotation-driven/>、<context:component-scan/>一起使用 -->
+    <mvc:annotation-driven/>
+    
+    <!-- 对静态资源的请求 -->
+   <mvc:resources location="/resources/" mapping="/resources/**"/>
+  
+   <!-- 开启文件上传支持 -->
+   <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+   
+ </beans>
+ 

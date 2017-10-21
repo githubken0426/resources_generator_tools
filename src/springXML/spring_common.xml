@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/aop 
+           http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+           http://www.springframework.org/schema/tx
+     	   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	
+	<!-- 配置dbcp数据源 -->
+	<bean id="dataSource" class="org.logicalcobwebs.proxool.ProxoolDataSource">
+		<property name="driver" value="${db.driver}" />
+		<property name="driverUrl" value="${db.url}" />
+		<property name="user" value="${db.user}" />
+		<property name="password" value="${db.password}" />
+		<!-- 最大的数据库连接数 -->
+		<property name="maximumConnectionCount" value="${db.maximumConnectionCount}"/> 
+		<!-- 最小的数据库连接数 -->
+		<property name="minimumConnectionCount" value="${db.minimumConnectionCount}"/>
+		<!-- 最长等待时间，单位毫秒 -->
+		<property name="maximumActiveTime" value="${db.maximumActiveTime}"/>
+		<!-- 连接池中可用的连接数量 -->
+		<property name="prototypeCount" value="${db.prototypeCount}"/>
+		<!-- 同时最大连接数 -->
+		<property name="simultaneousBuildThrottle" value="${db.simultaneousBuildThrottle}"/>
+	</bean>
+	
+	<!-- 配置mybitasSqlSessionFactoryBean,加载xml -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	 	<property name="configLocation" value="classpath:sqlMapConfig.xml" />  
+		<property name="mapperLocations" value="classpath*:org/mina/**/*Mapper.xml"/>
+		<property name="dataSource" ref="dataSource" />
+		<!--<property name="configLocation" value="classpath:mybatis-config.xml"></property>-->
+	</bean>
+	
+	<!-- MapperFactoryBean的出现为了代替手工使用SqlSessionDaoSupport或SqlSessionTemplate
+		编写数据访问对象(DAO)的代码,使用动态代理实现。MapperScannerConfigurer 为多个bean
+		提供映射器自动创建接口-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.mina.sourcegenerator.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	<!-- 使用annotation注解方式配置事务 
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+		<tx:method name="append*" propagation="REQUIRED" />
+			<tx:method name="modify*" propagation="REQUIRED" />
+			<tx:method name="edit*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="remove*" propagation="REQUIRED" />
+			<tx:method name="repair" propagation="REQUIRED" />
+			<tx:method name="delAndRepair" propagation="REQUIRED" />
+			<tx:method name="get*" propagation="SUPPORTS" />
+			<tx:method name="find*" propagation="SUPPORTS" />
+			<tx:method name="load*" propagation="SUPPORTS" />
+			<tx:method name="search*" propagation="SUPPORTS" />
+			<tx:method name="*" propagation="SUPPORTS" />
+	-->
+	
+	<!-- 事务配置 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 拦截器方式配置事物 -->
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="insert*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+	    <!--把事务控制在Service层-->
+	<aop:config>
+		<aop:pointcut id="transactionPointcut" expression="execution(* org.mina.sourcegenerator.service..*.*(..))" />
+		<aop:advisor pointcut-ref="transactionPointcut" advice-ref="transactionAdvice" />
+	</aop:config>
+
+</beans>

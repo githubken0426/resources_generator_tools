@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" 
+"http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<package name="##base_name##" extends="json-default">
+		<!-- ##base_name## : ##table_name_chinese##-->
+		<action name="##base_name##Action" class="##base_package##.action.##base_name2##Action">
+			<result name="list"  >/jsp/##base_name##/list.jsp</result>
+			<result name="add"   >/jsp/##base_name##/add.jsp</result>
+			<result name="update">/jsp/##base_name##/update.jsp</result>
+		</action>
+	</package>
+</struts>    
